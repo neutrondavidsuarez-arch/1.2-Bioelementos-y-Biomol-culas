@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioLearning - Tema 2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            emailjs.init({ publicKey: "3LjnpLaDboHWv0VPY" });
+        })();
+    </script>
+    <style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .iframe-container { position: relative; width: 100%; height: 75vh; border-radius: 1.5rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+        .nav-btn { transition: all 0.3s ease; border-bottom: 3px solid transparent; white-space: nowrap; }
+        .nav-btn:hover { transform: translateY(-2px); }
+        .nav-btn.active { border-color: #10b981; color: #10b981; }
+        @keyframes pulse-dot { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        .dot-pulse { animation: pulse-dot 1.2s infinite; }
+        .question-img { max-width: 100%; height: auto; border-radius: 0.5rem; margin: 0.5rem 0; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen">
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex flex-col lg:flex-row justify-between items-center gap-4">
+                <div class="text-center lg:text-left">
+                    <h1 class="text-xl font-black text-emerald-600 tracking-tight">UNIDAD 2</h1>
+                    <p class="text-slate-500 font-bold text-xs uppercase">Tema 1.2: Bioelementos y Biomoléculas</p>
+                </div>
+               
+                <nav class="flex flex-wrap justify-center gap-1 md:gap-4">
+                    <button onclick="prepQuiz('deber', this)" class="nav-btn active px-3 py-2 font-bold text-slate-700 flex items-center gap-2">
+                        <span>🧪</span> Deber
+                    </button>
+                    <button onclick="prepQuiz('evaluacion', this)" class="nav-btn px-3 py-2 font-bold text-slate-700 flex items-center gap-2">
+                        <span>📝</span> Repaso
+                    </button>
+                    <button onclick="prepQuiz('extra', this)" class="nav-btn px-3 py-2 font-bold text-slate-700 flex items-center gap-2">
+                        <span>📚</span> Práctica
+                    </button>
+                    <button onclick="prepQuiz('evaluacion_final', this)" class="nav-btn px-3 py-2 font-bold text-slate-700 flex items-center gap-2">
+                        <span>📊</span> Evaluación
+                    </button>
+                    <button onclick="showSection('pdf', this)" class="nav-btn px-3 py-2 font-bold text-slate-700 flex items-center gap-2">
+                        <span>📋</span> Pizarra
+                    </button>
+                    <button onclick="showSection('video', this)" class="nav-btn px-3 py-2 font-bold text-slate-700 flex items-center gap-2">
+                        <span>🎥</span> Video
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+    <main id="app" class="max-w-5xl mx-auto p-6">
+    </main>
+    <script>
+        const DRIVE_PDF_URL = "https://drive.google.com/file/d/1-TbHpumZ3cuurtte1zybGgydSc44MPRI/view?usp=sharing";
+        const DRIVE_VIDEO_URL = "https://drive.google.com/file/d/1oOmUTp-f-ZaWFQM4Ksf8_e_lGQfdrhyE/view?usp=sharing";
+
+        // PRINCIPAL (Deber + Repaso) 30/10 preguntas
+const quizData = [
+          { question: 'Relacione el bioelemento con su característica: <br> <img src="https://drive.google.com/thumbnail?id=114CWODZgCOC4FEc-aZLtRVm6YGX60gczHrfIlsUUKSo&sz=w800-h600" width="450" height="350" alt="Descripción">', options: ['1c, 2d, 3b, 4a.', '1c, 2d, 3a, 4b.', '1a, 2c, 3b, 4d', '1a, 2d, 3b, 4c'], answer: '1c, 2d, 3a, 4b.', explanation: 'b) 1c, 2d, 3a, 4b. <br> Sodio &rarr;  presión osmótica (c) <br> Hierro &rarr;  hemoglobina (d) <br> Calcio &rarr;  contracción muscular (a) <br> Magnesio &rarr;  clorofila (b).', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Cuál de los siguientes NO es un componente de un nucleótido?', options: ['Base nitrogenada', 'Azúcar pentosa', 'Aminoácido', 'Grupo fosfato'], answer: 'Aminoácido', explanation: 'Es el monómero de las proteínas (unidos por enlaces peptídicos). No forma parte de la estructura química de los nucleótidos ni de los ácidos nucleicos.', multi: 'OFF', maxSelect: 1 },
+          { question: 'Complete: Los polisacáridos están formados por la unión de monómeros. Presentan funciones de reserva y estructural como, por ejemplo, _________ tiene función ________.', options: ['la celulosa - estructural.', 'el almidón - de soporte.', 'la celulosa - de síntesis.', 'el glucógeno - de protección.'], answer: 'la celulosa - estructural.', explanation: 'La celulosa es un polisacárido estructural que forma la pared celular de las plantas, proporcionándoles rigidez y soporte.', multi: 'OFF', maxSelect: 1 },
+          { question: 'Marque verdadero (V) o falso (F), respecto a los ácidos nucleicos:<br>(  ) La desoxirribosa predomina en el DNA.<br>(  ) Un nucleótido está formado por un fosfato, una base nitrogenada y un azúcar pentosa.<br>(  ) El RNA presenta A, G, C, T.<br>(  ) El DNA siempre se encuentra en el citoplasma.<br>(  ) El DNA es muy estable en el medio ambiente.', options: ['V, V, F, F, F', 'V, V, F, F, V', 'F, V, F, F, V', 'V, F, F, F, V'], answer: 'V, V, F, F, F', explanation: '( V ) La desoxirribosa es la pentosa exclusiva de la estructura del ADN, diferenciándose de la ribosa presente en el ARN. ( V ) Constituye la definición anatómica básica del nucleótido, el monómero fundamental de los ácidos nucleicos. ( F ) El ARN no contiene timina; en su lugar posee uracilo junto a la adenina, guanina y citosina. ( F ) En organismos eucariotas, el ADN genómico se localiza dentro del núcleo celular.( F ) Fuera de la célula, el ADN se degrada con rapidez debido a la radiación ultravioleta, variaciones de pH, humedad y la acción de nucleasas ambientales.', multi: 'OFF', maxSelect: 1 },
+          { question: 'Se analiza una muestra de ADN de un pinzón, luego del análisis concluye que el 30% de las bases nitrogenadas son timina. ¿Cuál será el porcentaje de guanina que contiene la muestra?', options: ['30%', '70%', '20%', '50%'], answer: '20%', explanation: 'En el ADN, la cantidad de timina (T) es igual a la de adenina (A), y la cantidad de citosina (C) es igual a la de guanina (G). Si el 30% de las bases son timina, entonces otro 30% serán adenina. Esto suma un 60%, dejando un 40% para citosina y guanina. Como estas dos bases están en igual proporción, cada una representará el 20%.', multi: 'OFF', maxSelect: 1 },
+          { question: 'El agua es una biomolécula indispensable en los seres vivos, se encuentra formando aproximadamente el 70% del peso corporal, nunca se encuentra de manera estática, siempre está en movimiento, por lo que una de sus funciones sería:', options: ['Transportar moléculas.', 'Formar sustancias.', 'Ser componente de las membranas.', 'Ser reserva energética.'], answer: 'Transportar moléculas.', explanation: 'El agua es un solvente universal que disuelve una amplia variedad de sustancias, lo que le permite transportar nutrientes, desechos y otras moléculas esenciales en los organismos vivos.', multi: 'OFF', maxSelect: 1 },
+          { question: 'Patricio se propone bajar de peso, por lo que cada domingo realiza ayuno. Ante esta situación, el hígado utiliza las reservas de carbohidratos para compensar las necesidades de su organismo. ¿Cómo se llama el carbohidrato que se almacena en el hígado y lo utiliza ante este tipo de situaciones?', options: ['Glucógeno', 'Lactosa', 'Sacarosa', 'Almidón'], answer: 'Glucógeno', explanation: 'El glucógeno es un polisacárido de reserva energética que se almacena principalmente en el hígado y los músculos. Cuando el cuerpo necesita energía, el glucógeno se descompone en glucosa, que es utilizada por las células.', multi: 'OFF', maxSelect: 1 },
+          { question: 'Pedro, luego de consumir una bebida energética, observa los ingredientes y le causa curiosidad el término dextrosa. Pregunta sobre este término a su profesor de biología, quien responde que es la principal fuente de energía para las células del organismo, pero en concentraciones elevadas en la sangre puede ser perjudicial para la salud. ¿Cuál es el azúcar que contiene esta bebida?', options: ['Sacarosa', 'Almidón', 'Glucosa', 'Fructosa'], answer: 'Glucosa', explanation: 'La dextrosa es otro nombre para la glucosa, el monosacárido más común y la principal fuente de energía para las células.', multi: 'OFF', maxSelect: 1 },
+          { question: 'El DNA y RNA son ácidos nucleicos que presentan diferenciación funcional y estructural. Indique los enunciados correctos respecto al DNA y RNA:<br>I. El DNA almacena la información genética.<br>II. El RNA presenta tres tipos, que intervienen en la formación de proteínas.<br>III. El DNA está presente en el núcleo y los cloroplastos de los vegetales.', options: ['I y II', 'II y III', 'I y III', 'I, II y III'], answer: 'I, II y III', explanation: 'I. Verdadero: El ADN almacena la información genética en su secuencia de bases nitrogenadas.II. Verdadero: Existen tres tipos principales de ARN: mensajero (ARNm), ribosómico (ARNr) y transferencia (ARNt), todos ellos involucrados en la síntesis de proteínas.III. Verdadero: El ADN se encuentra en el núcleo de las células eucariotas, así como en los cloroplastos y mitocondrias de las células vegetales.', multi: 'OFF', maxSelect: 1 },
+          { question: 'Durante una campaña de vacunación, María decide vacunar a su hijo contra el sarampión, por lo que el organismo del niño producirá anticuerpos contra los antígenos virales que causan el sarampión.<br>¿Qué tipo de proteína se ha sintetizado en el organismo del niño?', options: ['Enzimática', 'Defensiva', 'Estructural', 'Reguladora'], answer: 'Defensiva', explanation: 'Los anticuerpos son proteínas defensivas producidas por el sistema inmunológico en respuesta a la presencia de antígenos (sustancias extrañas). Los anticuerpos se unen a los antígenos, neutralizándolos y facilitando su eliminación.', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Cuál de los siguientes lípidos NO es un componente principal de las membranas celulares?', options: ['Fosfolípidos', 'Glucolípidos', 'Colesterol', 'Triglicéridos'], answer: 'Triglicéridos', explanation: 'Son moléculas neutras formadas por una molécula de glicerol unida a tres ácidos grasos. Al ser totalmente apolares e hidrofóbicas, no pueden organizarse para formar bicapas líquidas; su función biológica es el almacenamiento de energía y el aislamiento térmico dentro de los adipocitos.', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Cuál es la temperatura corporal que mantienen las personas?', options: ['30°C', '37°C', '15°C', '24°C'], answer: '37°C', explanation: 'La temperatura corporal normal en los seres humanos es de aproximadamente 37°C. Esta temperatura es óptima para el funcionamiento de las enzimas y otros procesos biológicos.', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Cuáles son las biomoléculas orgánicas?', options: ['Las que no presentan un enlace C-C', 'Las que presentan un enlace C-C', 'Las que presentan un enlace C-H', 'Las que presentan un enlace H-N'], answer: 'Las que presentan un enlace C-C', explanation: 'Las biomoléculas orgánicas se caracterizan por tener una estructura basada en carbono, con enlaces carbono-carbono (C-C) formando su esqueleto.', multi: 'OFF', maxSelect: 1 },
+          { question: 'Los fosfolípidos son un tipo de lípidos anfipáticos compuestos por una molécula de diglicerol (cola doble) y un grupo fosfato (cabeza). Estos se caracterizan por:', options: ['Tener una cabeza hidrofílica polar y una cola doble hidrofóbica no polar', 'Tener una cabeza y cola doble hidrofílica polar', 'Tener una cabeza hidrofílica polar y una cola doble hidrofílica no polar.'], answer: 'Tener una cabeza hidrofílica polar y una cola doble hidrofóbica no polar', explanation: 'Los fosfolípidos tienen una "cabeza" polar que interactúa con el agua (hidrofílica) y dos "colas" no polares que repelen el agua (hidrofóbicas). Esta estructura anfipática les permite formar bicapas lipídicas, que son la base de las membranas celulares.', multi: 'OFF', maxSelect: 1 },
+          { question: 'El beriberi es una enfermedad que provoca debilidad y calambres en los músculos del cuerpo, la cual se produce por deficiencia de la vitamina:', options: ['B1', 'C', 'Ácido fólico', 'Biotina'], answer: 'B1', explanation: 'El beriberi es una enfermedad causada por la deficiencia de vitamina B1 (tiamina). La tiamina es esencial para el metabolismo de los carbohidratos y el funcionamiento del sistema nervioso.', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Qué propiedad del agua permite que las plantas puedan transportar nutrientes desde las raíces hasta las hojas?', options: ['Alta capacidad calorífica', 'Capilaridad', 'Densidad', 'Presión atmosférica'], answer: 'Capilaridad', explanation: 'La capilaridad es la capacidad del agua para ascender por tubos estrechos en contra de la gravedad. Esta propiedad permite que el agua y los nutrientes disueltos en ella sean transportados desde las raíces hasta las hojas de las plantas a través de los vasos conductores.', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Cuál es la función principal de las proteínas en el cuerpo humano?', options: ['Proveer energía rápida', 'Transportar oxígeno en la sangre', 'Formar estructuras y catalizar reacciones químicas', 'Provocar micción'], answer: 'Formar estructuras y catalizar reacciones químicas', explanation: 'Las proteínas son las biomoléculas más versátiles del organismo. Cumplen un rol estructural clave al constituir el citoesqueleto y formar tejidos como el colágeno y la queratina, y actúan como enzimas encargadas de acelerar y regular la velocidad de las reacciones metabólicas vitales.', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Qué característica distintiva tienen los ácidos nucleicos?', options: ['Están formados por monosacáridos', 'Contienen nitrógeno en su estructura', 'Son anfipáticos', 'Son hidrofóbicos'], answer: 'Contienen nitrógeno en su estructura', explanation: 'Los ácidos nucleicos (ADN y ARN) se caracterizan por contener bases nitrogenadas en su estructura. Estas bases nitrogenadas son adenina, guanina, citosina, timina (en el ADN) y uracilo (en el ARN).', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Cuál es una función clave de los carbohidratos en las células?', options: ['Servir como componentes estructurales en las membranas celulares', 'Proveer energía inmediata a través de la glucosa', 'Regular la actividad enzimática'], answer: 'Proveer energía inmediata a través de la glucosa', explanation: 'La glucosa es un carbohidrato simple que es la principal fuente de energía para las células. Se descompone en un proceso llamado glucólisis para liberar energía que las células pueden utilizar.', multi: 'OFF', maxSelect: 1 },
+          { question: 'Las vitaminas son biomoléculas esenciales que:', options: ['Proporcionan energía a las células.', 'Forman parte de las membranas celulares.', 'Actúan como coenzimas en reacciones metabólicas.', 'Almacenan información genética.'], answer: 'Actúan como coenzimas en reacciones metabólicas.', explanation: 'Muchas vitaminas, especialmente las hidrosolubles del complejo B funcionan como precursoras de coenzimas o cofactores indispensables para que las enzimas puedan catalizar y acelerar las reacciones metabólicas de las células.', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Cuál de los siguientes bioelementos NO es considerado primario, a pesar de su abundancia en los seres vivos?', options: ['Carbono (C)', 'Calcio (Ca)', 'Hidrógeno (H)', 'Nitrógeno (N)'], answer: 'Calcio (Ca)', explanation: 'Aunque el calcio es abundante en los seres vivos (especialmente en huesos y dientes), se considera un bioelemento secundario, no primario.', multi: 'OFF', maxSelect: 1 },
+          { question: 'La característica principal que hace que el carbono sea la base de la vida es su capacidad para:', options: ['Formar enlaces iónicos fuertes', 'Disolverse fácilmente en agua', 'Formar largas cadenas y anillos complejos', 'Reaccionar explosivamente con el oxígeno'], answer: 'Formar largas cadenas y anillos complejos', explanation: 'El carbono puede formar cuatro enlaces covalentes con otros átomos, incluyendo otros carbonos, lo que le permite crear estructuras moleculares complejas y diversas, esenciales para la vida.', multi: 'OFF', maxSelect: 1 },
+          { question: 'Los bioelementos traza, a pesar de su escasa cantidad, son esenciales porque:', options: ['Forman parte de hormonas y enzimas vitales', 'Constituyen la mayor parte de la masa celular', 'Son la fuente principal de energía para las células', 'Regulan la temperatura corporal'], answer: 'Forman parte de hormonas y enzimas vitales', explanation: 'Los bioelementos traza, aunque presentes en pequeñas cantidades, son cofactores esenciales para el funcionamiento de muchas enzimas y hormonas cruciales para el metabolismo y la regulación de procesos biológicos.', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Cuál de las siguientes moléculas NO es un ejemplo de biomolécula inorgánica?', options: ['Agua (H₂O)', 'Cloruro de sodio (NaCl)', 'Fosfato de calcio (Ca₃(PO₄)₂)', 'Glucosa (C₆H₁₂O₆)'], answer: 'Glucosa (C₆H₁₂O₆)', explanation: 'Pertenece al grupo de los glúcidos o carbohidratos. Al estar sintetizada  por seres vivos a partir de esqueletos carbonados, constituye una molécula orgánica indispensable para la obtención de energía en la respiración celular.', multi: 'OFF', maxSelect: 1 },
+          { question: 'La estructura tridimensional de las proteínas es crucial para su función. ¿Qué tipo de enlace estabiliza esta estructura?', options: ['Enlace iónico', 'Enlace covalente', 'Enlace de hidrógeno', 'Enlace metálico'], answer: 'Enlace de hidrógeno', explanation: 'Los enlaces de hidrógeno son interacciones débiles que se forman entre átomos de hidrógeno y átomos electronegativos como el oxígeno o el nitrógeno. Estos enlaces son cruciales para estabilizar la estructura tridimensional de las proteínas, como las hélices alfa y las láminas beta.', multi: 'OFF', maxSelect: 1 },
+          { question: 'Los ácidos nucleicos, como el ADN y el ARN, son polímeros de:', options: ['Aminoácidos', 'Monosacáridos', 'Nucleótidos', 'Ácidos grasos'], answer: 'Nucleótidos', explanation: 'Los ácidos nucleicos (ADN y ARN) son polímeros formados por unidades repetitivas llamadas nucleótidos. Cada nucleótido consta de una base nitrogenada, un azúcar pentosa y un grupo fosfato.', multi: 'OFF', maxSelect: 1 },
+          { question: 'La desnaturalización de una proteína implica:', options: ['La ruptura de sus enlaces peptídicos.', 'La pérdida de su estructura tridimensional.', 'La formación de enlaces covalentes.', 'La hidrólisis de sus aminoácidos en los organismos.'], answer: 'La pérdida de su estructura tridimensional.', explanation: 'La desnaturalización desorganiza los puentes de hidrógeno, interacciones hidrofóbicas y enlaces iónicos que mantienen la forma espacial nativa de la proteína. Aunque la cadena se despliega y la proteína pierde su función biológica, la estructura primaria (secuencia de aminoácidos) se mantiene intacta.', multi: 'OFF', maxSelect: 1 },
+          { question: 'Los lípidos son un grupo diverso de biomoléculas con una característica común:', options: ['Son solubles en agua', 'Son insolubles en solventes orgánicos', 'Son hidrofílicos', 'Son hidrofóbicos'], answer: 'Son hidrofóbicos', explanation: 'Los lípidos son insolubles en agua (hidrofóbicos) debido a su naturaleza no polar. Esta propiedad es esencial para su función en las membranas celulares y como reserva energética.', multi: 'OFF', maxSelect: 1 },
+          { question: 'Las enzimas son biocatalizadores esenciales para la vida. ¿Cuál es su naturaleza química?', options: ['Lípidos', 'Carbohidratos', 'Ácidos nucleicos', 'Proteínas'], answer: 'Proteínas', explanation: 'Las enzimas son proteínas que actúan como catalizadores biológicos, acelerando reacciones químicas en los seres vivos sin consumirse en el proceso.', multi: 'OFF', maxSelect: 1 },
+          { question: 'El ATP (adenosín trifosfato) es la "moneda energética" de las células. ¿Qué tipo de biomolécula es?', options: ['Nucleótido', 'Proteína', 'Lípido', 'Carbohidrato'], answer: 'Nucleótido', explanation: 'El ATP es un nucleótido modificado que actúa como la principal fuente de energía para las células. Almacena energía en sus enlaces fosfato de alta energía y la libera cuando se hidroliza a ADP (adenosín difosfato).', multi: 'OFF', maxSelect: 1 },
+        ];
+
+        // Práctica 20 preguntas
+const quizDataExtra = [
+          { question: '¿Cuál de los siguientes NO es un componente de un nucleótido?', options: ['Base nitrogenada', 'Azúcar pentosa', 'Aminoácido', 'Grupo fosfato'], answer: 'Aminoácido', explanation: 'Los aminoácidos son los componentes básicos de las proteínas, no de los nucleótidos. Los nucleótidos están formados por una base nitrogenada, un azúcar pentosa y un grupo fosfato.', multi: 'OFF', maxSelect: 1 },
+          { question: 'Las proteínas se clasifican en diferentes niveles de estructura. ¿Cuál de ellos describe la secuencia lineal de aminoácidos?', options: ['Estructura primaria', 'Estructura secundaria', 'Estructura terciaria', 'Estructura cuaternaria'], answer: 'Estructura primaria', explanation: 'La estructura primaria de una proteína es la secuencia lineal de aminoácidos unidos por enlaces peptídicos. Esta secuencia determina la forma y función de la proteína.', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Cuál de los siguientes lípidos NO es un componente principal de las membranas celulares?', options: ['Fosfolípidos', 'Glucolípidos', 'Colesterol', 'Triglicéridos'], answer: 'Triglicéridos', explanation: 'Los triglicéridos son lípidos de almacenamiento de energía y no forman parte de las membranas celulares. Los fosfolípidos, glucolípidos y colesterol son componentes esenciales de las membranas celulares, proporcionando estructura y funciones específicas.', multi: 'OFF', maxSelect: 1 },
+          { question: 'La lactosa, el azúcar de la leche, es un disacárido formado por:', options: ['Glucosa + Fructosa', 'Glucosa + Galactosa', 'Glucosa + Glucosa', 'Fructosa + Galactosa'], answer: 'Glucosa + Galactosa', explanation: 'La lactosa es un disacárido formado por la unión de una molécula de glucosa y una molécula de galactosa mediante un enlace glucosídico.', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Cuál de los siguientes NO es un ejemplo de función de los carbohidratos en los seres vivos?', options: ['Reserva energética', 'Estructural', 'Reconocimiento celular', 'Catálisis enzimática'], answer: 'Catálisis enzimática', explanation: 'La catálisis enzimática es una función de las proteínas, específicamente de las enzimas. Los carbohidratos tienen funciones de reserva energética (almidón, glucógeno), estructural (celulosa, quitina) y reconocimiento celular (glucocálix).', multi: 'OFF', maxSelect: 1 },
+          { question: 'Las vitaminas son biomoléculas esenciales que:', options: ['Proporcionan energía a las células', 'Forman parte de las membranas celulares', 'Actúan como coenzimas en reacciones metabólicas', 'Almacenan información genética'], answer: 'Actúan como coenzimas en reacciones metabólicas', explanation: 'Muchas vitaminas son precursoras de coenzimas, moléculas que ayudan a las enzimas a funcionar correctamente en las reacciones metabólicas.', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Cuál de los siguientes NO es un ejemplo de proteína fibrosa?', options: ['Colágeno', 'Queratina', 'Elastina', 'Hemoglobina'], answer: 'Hemoglobina', explanation: 'La hemoglobina es una proteína globular que transporta oxígeno en la sangre. Las proteínas fibrosas, como el colágeno, la queratina y la elastina, tienen estructuras alargadas y proporcionan soporte y resistencia.', multi: 'OFF', maxSelect: 1 },
+          { question: 'La desnaturalización de una proteína implica:', options: ['La ruptura de sus enlaces peptídicos', 'La pérdida de su estructura tridimensional', 'La formación de nuevos enlaces covalentes', 'La hidrólisis de sus aminoácidos'], answer: 'La pérdida de su estructura tridimensional', explanation: 'La desnaturalización de una proteína implica la ruptura de los enlaces débiles (como los enlaces de hidrógeno) que mantienen su estructura tridimensional, lo que resulta en la pérdida de su función biológica.', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Cuál de los siguientes NO es un ejemplo de función de los lípidos en los seres vivos?', options: ['Aislamiento térmico', 'Reserva energética', 'Transporte de oxígeno', 'Formación de hormonas'], answer: 'Transporte de oxígeno', explanation: 'El transporte de oxígeno es una función de la hemoglobina, una proteína, no de los lípidos. Los lípidos tienen funciones de aislamiento térmico, reserva energética y formación de hormonas (esteroides).', multi: 'OFF', maxSelect: 1 },
+          { question: 'El glucógeno es un polisacárido de reserva energética presente en:', options: ['Plantas', 'Animales', 'Bacterias', 'Hongos'], answer: 'Animales', explanation: 'El glucógeno es la forma en que los animales almacenan glucosa en el hígado y los músculos para su uso posterior como energía.', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Cuál de las siguientes bases nitrogenadas NO se encuentra en el ADN?', options: ['Adenina', 'Guanina', 'Citosina', 'Uracilo'], answer: 'Uracilo', explanation: 'El uracilo (U) es una base nitrogenada exclusiva del ARN. En el ADN, el uracilo es reemplazado por la timina (T).', multi: 'OFF', maxSelect: 1 },
+          { question: 'La estructura secundaria del ADN se caracteriza por:', options: ['La secuencia de nucleótidos', 'La doble hélice antiparalela', 'La interacción con proteínas', 'La formación de cromosomas'], answer: 'La doble hélice antiparalela', explanation: 'La estructura secundaria del ADN se caracteriza por dos cadenas de nucleótidos enrolladas en una doble hélice, donde las bases nitrogenadas se complementan (A con T, y C con G). Las cadenas son antiparalelas, lo que significa que corren en direcciones opuestas.', multi: 'OFF', maxSelect: 1 },
+          { question: 'Los ácidos grasos saturados se diferencian de los insaturados por:', options: ['La presencia de dobles enlaces en su cadena', 'La longitud de su cadena', 'La ausencia de dobles enlaces en su cadena', 'La presencia de grupos funcionales'], answer: 'La ausencia de dobles enlaces en su cadena', explanation: 'Los ácidos grasos saturados tienen todos sus enlaces carbono-carbono como enlaces simples, mientras que los ácidos grasos insaturados tienen uno o más dobles enlaces en su cadena.', multi: 'OFF', maxSelect: 1 },
+          { question: 'La función principal del colesterol en las membranas celulares es:', options: ['Proporcionar energía', 'Almacenar información', 'Regular la fluidez', 'Transportar sustancias'], answer: 'Regular la fluidez', explanation: 'El colesterol es un componente importante de las membranas celulares animales y ayuda a mantener su fluidez a diferentes temperaturas.', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Cuál de las siguientes biomoléculas NO está directamente involucrada en la síntesis de proteínas?', options: ['ADN', 'ARN mensajero', 'ARN de transferencia', 'Colesterol'], answer: 'Colesterol', explanation: 'El colesterol es un lípido que forma parte de las membranas celulares, pero no está directamente involucrado en la síntesis de proteínas. El ADN, el ARN mensajero y el ARN de transferencia son ácidos nucleicos esenciales para la síntesis de proteínas.', multi: 'OFF', maxSelect: 1 },
+          { question: 'Las proteínas globulares se caracterizan por:', options: ['Ser insolubles en agua', 'Tener una estructura tridimensional compacta', 'Formar fibras resistentes', 'Ser componentes de las membranas celulares'], answer: 'Tener una estructura tridimensional compacta', explanation: 'Las proteínas globulares se pliegan en formas compactas y esféricas, lo que les permite realizar diversas funciones, como transporte, catálisis enzimática y regulación.', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Cuál de los siguientes NO es un ejemplo de función de las proteínas en los seres vivos?', options: ['Transporte de sustancias', 'Defensa inmunológica', 'Catálisis enzimática', 'Almacenamiento de información genética'], answer: 'Almacenamiento de información genética', explanation: 'El almacenamiento de información genética es una función del ADN, no de las proteínas. Las proteínas desempeñan funciones de transporte de sustancias (hemoglobina), defensa inmunológica (anticuerpos) y catálisis enzimática.', multi: 'OFF', maxSelect: 1 },
+          { question: 'La glucosa es un monosacárido que se clasifica como:', options: ['Cetosa', 'Aldosa', 'Disacárido', 'Polisacárido'], answer: 'Aldosa', explanation: 'La glucosa es un monosacárido que contiene un grupo aldehído en su estructura, lo que la clasifica como una aldosa.', multi: 'OFF', maxSelect: 1 },
+          { question: 'La hidrólisis del almidón produce:', options: ['Fructosa', 'Galactosa', 'Glucosa', 'Maltosa'], answer: 'Glucosa', explanation: 'El almidón es un polisacárido compuesto de muchas unidades de glucosa unidas por enlaces glucosídicos. La hidrólisis del almidón rompe estos enlaces, liberando moléculas de glucosa.', multi: 'OFF', maxSelect: 1 },
+          { question: '¿Cuál de las siguientes biomoléculas es la principal fuente de energía a corto plazo para las células?', options: ['Proteínas', 'Lípidos', 'Carbohidratos', 'Ácidos nucleicos'], answer: 'Carbohidratos', explanation: 'Los carbohidratos, especialmente la glucosa, son la principal fuente de energía a corto plazo para las células. La glucosa se descompone fácilmente en el proceso de respiración celular para liberar energía utilizable.', multi: 'OFF', maxSelect: 1 },
+        ];
+
+        // EVALUACIÓN 16 preguntas
+const quizDataEvaluacion = [
+
+            { question: '¿Cuál de los siguientes no es un bioelemento primario en los seres vivos?', options: ['Carbono', 'Hierro', 'Hidrógeno', 'Oxígeno'], answer: 'Hierro', explanation: 'El hierro no es un bioelemento primario, sino un oligoelemento, ya que se encuentra en bajas concentraciones en los seres vivos, pero sigue siendo esencial para diversas funciones biológicas. Los bioelementos primarios son: Carbono (C), Hidrógeno (H), Oxígeno (O), Nitrógeno (N), Fósforo (P) y Azufre (S), ya que constituyen la mayor parte de la materia viva. <br> <img src="https://drive.google.com/thumbnail?id=1nv6aJH3CTceBOwkdqpH5Ty4e3PtJFYExsUvpif1CmeI&sz=w800-h600" width="600" height="350" alt="Descripción">', multi: 'OFF', maxSelect: 1 },
+            { question: '¿Cuál de los siguientes no es un bioelemento secundario esencial?', options: ['Calcio', 'Fósforo', 'Sodio', 'Yodo'], answer: 'Fósforo', explanation: 'El fósforo no es un bioelemento secundario esencial, ya que es un bioelemento primario. Los bioelementos primarios son aquellos que constituyen la mayor parte de la materia viva, como el carbono (C), hidrógeno (H), oxígeno (O), nitrógeno (N), fósforo (P) y azufre (S). En cambio, el calcio (Ca), sodio (Na) y yodo (I) son bioelementos secundarios esenciales, ya que cumplen funciones importantes en los organismos, pero en menor proporción que los primarios.', multi: 'OFF', maxSelect: 1 },
+            { question: '¿Qué tipo de biomolécula es la hemoglobina?', options: ['Carbohidrato', 'Lípido', 'Proteína', 'Ácido nucleico'], answer: 'Proteína', explanation: 'Es una heteroproteína (proteína conjugada) con estructura cuaternaria, formada por cuatro cadenas polipeptídicas (dos cadenas 𝛼y dos cadenas &beta;) asociadas cada una a un grupo prostético hemo. <br>Su función biológica principal en los eritrocitos (glóbulos rojos) es el transporte reversible de oxígeno (O<sub>2</sub>) desde los alvéolos pulmonares hacia los tejidos periféricos, gracias a la coordinación del gas con el catión ferroso (Fe<sup>2+</sup>) del grupo hemo. <br> <img src="https://drive.google.com/thumbnail?id=1WZJaRYREK-MQmxp6-orG9vuop2qt34hieC349S_m9Nk&sz=w800-h600" width="600" height="330" alt="Descripción">', multi: 'OFF', maxSelect: 1 },
+            { question: '¿Cuál de las siguientes no es una función de los lípidos en los organismos vivos?', options: ['Almacenamiento de energía', 'Formación de membranas celulares', 'Regulación del pH', 'Aislamiento térmico'], answer: 'Regulación del pH', explanation: 'Los lípidos cumplen algunas funciones como el almacenamiento de energía en forma de triglicéridos, la formación de membranas celulares fosfolípidos y colesterol y el aislamiento térmico grasa corporal. Sin embargo, no realizan la regulación del pH, ya que esta es una función principalmente de los sistemas amortiguadores del cuerpo, como el sistema de bicarbonato, proteínas y fosfatos.', multi: 'OFF', maxSelect: 1 },
+            { question: '¿Qué función no realiza el agua en los seres vivos?', options: ['Medio de transporte de nutrientes', 'Disolución de sustancias', 'Aporta energía a las células', 'Regulación de la temperatura corporal'], answer: 'Aporta energía a las células', explanation: 'El agua no aporta energía a las células, ya que esta función es desempeñada principalmente por los carbohidratos  que actúan como la principal fuente de energía de los seres vivos. <br> El agua cumple diversas funciones fundamentales, como disolver sustancias, transportar nutrientes, regular la temperatura y facilitar la ósmosis, entre otras.', multi: 'OFF', maxSelect: 1 },
+            { question: '¿Cuál de las siguientes es una función de los carbohidratos en los organismos vivos?', options: ['Catalizar reacciones químicas', 'Formar estructuras celulares', 'Almacenar información genética', 'Transmitir impulsos nerviosos'], answer: 'Formar estructuras celulares', explanation: 'Los carbohidratos cumplen funciones esenciales en la formación de estructuras celulares, gracias a su participación en la composición de la pared celular en organismos como plantas (celulosa) y hongos (quitina), así como en la estructura de glicoproteínas y glicolípidos en las membranas celulares de los vegetales.', multi: 'OFF', maxSelect: 1 },
+            { question: '¿Cuál de las siguientes no es una característica de los ácidos nucleicos?', options: ['Están formados por nucleótidos', 'Almacenan información genética', 'Son polímeros de aminoácidos', 'Participan en la síntesis de proteínas'], answer: 'Son polímeros de aminoácidos', explanation: 'Los polímeros de aminoácidos no son una característica de los ácidos nucleicos, ya que, corresponden a la estructura de las proteínas. Por su parte los ácidos nucleicos en su característica estructural están formados por nucleótidos y son los que almacenan información genética y participan en la síntesis de proteínas. <br> <img src="https://drive.google.com/thumbnail?id=1a1dTmluWOuWiJMajwA7iWqyzccNksJXjsfIZjXe_XGE&sz=w800-h600" width="700" height="330" alt="Descripción">', multi: 'OFF', maxSelect: 1 },
+            { question: '¿Cuál de los siguientes elementos es esencial para la estructura de los huesos y dientes?', options: ['Potasio', 'Zinc', 'Calcio', 'Magnesio'], answer: 'Calcio', explanation: 'Es el bioelemento secundario macro constituyente fundamental del tejido óseo y de las piezas dentarias. <br>Se deposita en la matriz extracelular en forma de un mineral complejo cristalino denominado hidroxiapatita [Ca<sub>10</sub>(PO<sub>4</sub>)<sub>6</sub>(OH)<sub>2</sub>], otorgando al esqueleto su rigidez estructural, resistencia mecánica y dureza compresiva. <br> <img src="https://drive.google.com/thumbnail?id=1SzlPbRcTLqqtL1cKhKhZggmKqjcSq512gNY0AIvchLw&sz=w800-h600" width="700" height="310" alt="Descripción">', multi: 'OFF', maxSelect: 1 },
+            { question: '¿Qué función tiene el hierro en los seres vivos?', options: ['Forma parte de la estructura del ADN', 'Transporta oxígeno en la sangre', 'Actúa como cofactor en enzimas', 'Regula el equilibrio hídrico celular'], answer: 'Transporta oxígeno en la sangre', explanation: 'El hierro es un oligoelemento indispensable cuyo rol sistémico prioritario es la coordinación y el transporte reversible de oxígeno (O<sub>2</sub>) a través de la hemoglobina presente en los eritrocitos. <br> Ocupa el centro del anillo tetrapirrólico de porfirina (grupo hemo), coordinando transitoriamente la molécula de oxígeno molecular en su estado de oxidación ferroso (Fe<sup>2+</sup>). <br> <img src="https://drive.google.com/thumbnail?id=1KRBvnido4sc43u8jYc4svhlDTY3McFP2-ylJAC_9ewY&sz=w800-h600" width="400" height="220" alt="Descripción">', multi: 'OFF', maxSelect: 1 },
+            { question: '¿Cuál de los siguientes no es un monosacárido?', options: ['Glucosa', 'Fructosa', 'Sacarosa', 'Galactosa'], answer: 'Sacarosa', explanation: 'La sacarosa no es un monosacárido. Es un disacárido, compuesto por dos monosacáridos: glucosa y fructosa. Los otros son monosacáridos. <br> <img src="https://drive.google.com/thumbnail?id=1xCqnvMW7oFMIk1G_LJk3g50UuLTfpe3riE82zN_77Hg&sz=w800-h600" width="400" height="220" alt="Descripción">', multi: 'OFF', maxSelect: 1 },
+            { question: '¿Qué tipo de enlace une los aminoácidos en una proteína?', options: ['Enlace peptídico', 'Enlace glucosídico', 'Enlace éster', 'Enlace fosfodiéster'], answer: 'Enlace peptídico', explanation: 'Es un enlace covalente de tipo amida resultante de la reacción de condensación entre el grupo carboxilo (−"COOH") de un aminoácido y el grupo amino (-NH<sub>2</sub>) del aminoácido adyacente. <br> La formación de cada enlace peptídico requiere el desprendimiento de una molécula de agua (H<sub>2</sub>O), dando lugar a cadenas polipeptídicas que constituyen las proteínas. <br> <img src="https://drive.google.com/thumbnail?id=1b2H7nzU64TKqOkztkG4tKXmd_fOL3ZMj2VkgQquy6HQ&sz=w800-h600" width="400" height="220" alt="Descripción">', multi: 'OFF', maxSelect: 1 },
+            { question: '¿Cuál de las siguientes no es una función de las proteínas?', options: ['Transporte de oxígeno', 'Almacenamiento de energía', 'Defensa frente a patógenos', 'Control de reacciones metabólicas'], answer: 'Almacenamiento de energía', explanation: 'Las proteínas cumplen muchas funciones en los seres vivos, pero no se especializan en el almacenamiento de energía. Esta función es propia de los lípidos (grasas) y los carbohidratos (glucógeno en animales y almidón en plantas).', multi: 'OFF', maxSelect: 1 },
+            { question: '¿Qué tipo de lípido forma la mayor parte de la membrana celular?', options: ['Triglicéridos', 'Fosfolípidos', 'Colesterol', 'Esteroides'], answer: 'Fosfolípidos', explanation: 'La membrana celular está compuesta principalmente por fosfolípidos, que forman una bicapa lipídica. Cada fosfolípido tiene una cabeza hidrofílica (se atrae el agua) y dos colas hidrofóbicas (que rechazan el agua). <br> Las otras opciones no son correctas: <br>Los triglicéridos sirven para almacenamiento de energía, pero no forman parte principal de la membrana. <br> El colesterol ayuda a darle fluidez y estabilidad a la membrana, pero no es el componente principal. <br> Los esteroides son lípidos con funciones hormonales, pero no forman la estructura principal de la membrana. <br> <img src="https://drive.google.com/thumbnail?id=1ud8f3qu9JhEFpibXw43FctCoj96XtRMlFcuNnKpTAPs&sz=w800-h600" width="400" height="220" alt="Descripción">', multi: 'OFF', maxSelect: 1 },
+            { question: '¿Cuál de los siguientes no es un ácido nucleico?', options: ['ADN', 'ARN', 'ATP', 'cAMP'], answer: 'ATP', explanation: 'Los ácidos nucleicos son biopolímeros constituidos por largas cadenas poliméricas de nucleótidos (polinucleótidos) cuyo rol es la codificación, almacenamiento, transmisión y expresión de la información genética ("ADN" y "ARN"). <br> El "ATP"(adenosíntrifosfato) no es un polímero genético, sino un nucleótido libre monomérico formado por una base nitrogenada (adenina), una ribosa y tres grupos fosfato. Actúa como la principal "moneda energética" celular al almacenar y liberar energía mediante sus enlaces fosfato.', multi: 'OFF', maxSelect: 1 },
+            { question: '¿Qué función tiene el ATP en las células?', options: ['Almacenar información genética', 'Transportar oxígeno en la sangre', 'Transferir energía química', 'Formar la estructura de los ribosomas'], answer: 'Transferir energía química', explanation: 'La función del ATP en las células es transferir energía química. El ATP (trifosfato de adenosina) actúa como una molécula de almacenamiento y transferencia de energía en las células. Cuando se rompe uno de sus enlaces fosfato, se libera energía que las células utilizan para realizar diversas funciones, como la síntesis de proteínas, el transporte activo de sustancias a través de las membranas celulares y la contracción muscular, entre otras.', multi: 'OFF', maxSelect: 1 },
+            { question: '¿Cuál de los siguientes elementos es un componente esencial de muchas vitaminas y enzimas?', options: ['Sodio', 'Cloro', 'Azufre', 'Magnesio'], answer: 'Azufre', explanation: 'El azufre es un componente esencial de muchas vitaminas y enzimas. Se encuentra en los aminoácidos cisteína y metionina, que son fundamentales para la estructura y función de proteínas y enzimas. Además, el azufre es parte de algunas coenzimas y vitaminas como la biotina, que desempeñan roles importantes en procesos metabólicos dentro de las células. <br> Los otros elementos mencionados, como el sodio, el cloro y el magnesio, son importantes en funciones biológicas, pero no son componentes clave en vitaminas y enzimas como el azufre.', multi: 'OFF', maxSelect: 1 },
+        ];
+
+        // ========== CONFIGURACIÓN DEL TEMPORIZADOR DE EVALUACIÓN ==========
+        const EVAL_TIMER_SECONDS = 960; // 16 minutos
+
+        const EVAL_TIMER_PHASES = [
+            { minSeconds: 480, colorClass: 'text-emerald-600 bg-emerald-50 border-emerald-300' },
+            { minSeconds: 60,  colorClass: 'text-amber-600 bg-amber-50 border-amber-300' },
+            { minSeconds: 0,   colorClass: 'text-red-600 bg-red-50 border-red-300' }
+        ];
+        // ==================================================================
+
+        let state = {
+            currentMode: 'deber',
+            view: 'quiz_home',
+            studentName: '',
+            studentEmail: '',
+            activeQuestions: [],
+            currentQuestion: 0,
+            score: 0,
+            selectedAnswer: null,
+            isAnswerCorrect: null,
+            emailStatus: null,
+            emailAnalysis: null,
+            emailAnalysisMsg: '',
+            timeLeft: 0
+        };
+
+        let timerInterval = null;
+
+        const disposableDomains = [
+            'tempmail.com','temp-mail.org','guerrillamail.com','10minutemail.com','mailinator.com',
+            'yopmail.com','throwawaymail.com','fakeinbox.com','trashmail.com','getnada.com',
+            'maildrop.cc','dispostable.com','sharklasers.com','guerrillamailblock.com'
+        ];
+        const trustedProviders = [
+            'gmail.com','googlemail.com','hotmail.com','hotmail.es','hotmail.co.uk','outlook.com',
+            'outlook.es','live.com','msn.com','yahoo.com','yahoo.es','icloud.com','me.com',
+            'protonmail.com','proton.me','aol.com','zoho.com','gmx.com','mail.com'
+        ];
+
+        function isValidEmailFormat(email) {
+            const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+            return re.test(email) && email.length <= 254 && !email.includes('..') && !email.startsWith('.') && !email.endsWith('.');
+        }
+
+        function analyzeEmail(email) {
+            const lower = email.toLowerCase().trim();
+            if (!lower) return { valid: false, msg: 'Escribe un correo electrónico.' };
+            if (!isValidEmailFormat(lower)) return { valid: false, msg: 'Formato inválido. Revisa que tenga @ y un dominio correcto.' };
+            const domain = lower.split('@')[1];
+            if (!domain || domain.length < 3) return { valid: false, msg: 'Dominio incompleto o inválido.' };
+            if (disposableDomains.some(d => domain === d || domain.endsWith('.' + d))) {
+                return { valid: false, msg: 'Correo temporal / desechable detectado. Usa un correo real.' };
+            }
+            const isTrusted = trustedProviders.some(p => domain === p);
+            const hasGoodTld = /\.(com|es|net|org|edu|gov|mx|ar|co|uk|de|fr|it|pt|br|cl)$/i.test(domain);
+            if (!hasGoodTld && !isTrusted) {
+                return { valid: false, msg: 'Dominio poco común o sospechoso. Usa Gmail, Hotmail/Outlook, Yahoo, etc.' };
+            }
+            let analysisText = '';
+            if (domain.includes('hotmail') || domain.includes('outlook') || domain.includes('live.com') || domain.includes('msn.com')) {
+                analysisText = 'Análisis: proveedor Microsoft (Hotmail/Outlook) detectado · formato correcto · dominio legítimo';
+            } else if (domain.includes('gmail') || domain.includes('googlemail')) {
+                analysisText = 'Análisis: proveedor Google (Gmail) detectado · formato correcto · dominio legítimo';
+            } else if (isTrusted) {
+                analysisText = 'Análisis: proveedor conocido · formato correcto · dominio legítimo';
+            } else {
+                analysisText = 'Análisis: formato válido · dominio con TLD estándar · no se detectaron patrones de correo temporal';
+            }
+            return { valid: true, msg: analysisText };
+        }
+
+        function showSection(section, btn) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            stopTimer();
+            const app = document.getElementById('app');
+            if (section === 'pdf') {
+                app.innerHTML = `<div class="animate-fade-in"><h2 class="text-xl font-bold mb-4">📄 Pizarra Virtual</h2><div class="iframe-container"><iframe src="${DRIVE_PDF_URL}" width="100%" height="100%" allow="autoplay"></iframe></div></div>`;
+            } else if (section === 'video') {
+                app.innerHTML = `<div class="animate-fade-in"><h2 class="text-xl font-bold mb-4">🎥 Video Clase</h2><div class="iframe-container"><iframe src="${DRIVE_VIDEO_URL}" width="100%" height="100%" allow="autoplay"></iframe></div></div>`;
+            }
+        }
+
+        function prepQuiz(mode, btn) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            stopTimer();
+            state = {
+                currentMode: mode,
+                view: 'quiz_home',
+                studentName: '',
+                studentEmail: '',
+                activeQuestions: [],
+                currentQuestion: 0,
+                score: 0,
+                selectedAnswer: null,
+                isAnswerCorrect: null,
+                emailStatus: null,
+                emailAnalysis: null,
+                emailAnalysisMsg: '',
+                timeLeft: 0
+            };
+            render();
+        }
+
+        function startQuiz() {
+            if (state.currentMode === 'deber') {
+                state.activeQuestions = [...quizData];
+            } else if (state.currentMode === 'evaluacion') {
+                state.activeQuestions = [...quizData]
+                    .sort(() => 0.5 - Math.random())
+                    .slice(0, 10);
+            } else if (state.currentMode === 'extra') {
+                state.activeQuestions = [...quizDataExtra];
+            } else if (state.currentMode === 'evaluacion_final') {
+                state.activeQuestions = [...quizDataEvaluacion];
+            }
+            state.view = 'name_input';
+            state.emailAnalysis = null;
+            state.emailAnalysisMsg = '';
+            render();
+        }
+
+        function onEmailInput() {
+            const e = document.getElementById('email-in');
+            if (!e) return;
+            const val = e.value.trim();
+            if (val.length < 5) {
+                state.emailAnalysis = null;
+                state.emailAnalysisMsg = '';
+                updateEmailUI();
+                return;
+            }
+            state.emailAnalysis = 'checking';
+            state.emailAnalysisMsg = 'Analizando correo…';
+            updateEmailUI();
+            clearTimeout(window._emailCheckTimer);
+            window._emailCheckTimer = setTimeout(() => {
+                const result = analyzeEmail(val);
+                state.emailAnalysis = result.valid ? 'valid' : 'invalid';
+                state.emailAnalysisMsg = result.msg;
+                updateEmailUI();
+            }, 600);
+        }
+
+        function updateEmailUI() {
+            const feedback = document.getElementById('email-feedback');
+            const analysis = document.getElementById('email-analysis');
+            const input = document.getElementById('email-in');
+            if (!feedback || !analysis || !input) return;
+            if (state.emailAnalysis === 'checking') {
+                feedback.innerHTML = `<span class="text-slate-500 text-sm flex items-center gap-2"><span class="dot-pulse">●</span> Verificando…</span>`;
+                analysis.innerHTML = `<p class="text-xs text-slate-400 mt-1">${state.emailAnalysisMsg}</p>`;
+                input.classList.remove('border-red-400', 'border-emerald-400');
+                input.classList.add('border-slate-300');
+            } else if (state.emailAnalysis === 'invalid') {
+                feedback.innerHTML = `<span class="text-red-600 text-sm font-semibold">✗ Correo no válido o inexistente</span>`;
+                analysis.innerHTML = `<p class="text-xs text-red-500/80 mt-1">${state.emailAnalysisMsg}</p>`;
+                input.classList.remove('border-emerald-400', 'border-slate-300');
+                input.classList.add('border-red-400');
+            } else if (state.emailAnalysis === 'valid') {
+                feedback.innerHTML = `<span class="text-emerald-600 text-sm font-semibold">✓ Correo aceptado</span>`;
+                analysis.innerHTML = `<p class="text-xs text-emerald-600/80 mt-1">${state.emailAnalysisMsg}</p>`;
+                input.classList.remove('border-red-400', 'border-slate-300');
+                input.classList.add('border-emerald-400');
+            } else {
+                feedback.innerHTML = '';
+                analysis.innerHTML = '';
+                input.classList.remove('border-red-400', 'border-emerald-400');
+                input.classList.add('border-slate-300');
+            }
+        }
+
+        function validaDatos() {
+            const n = document.getElementById('name-in').value.trim();
+            const e = document.getElementById('email-in').value.trim();
+            if (n.length <= 2) {
+                alert("Ingresa nombre completo (mínimo 3 caracteres).");
+                return;
+            }
+            const result = analyzeEmail(e);
+            state.emailAnalysis = result.valid ? 'valid' : 'invalid';
+            state.emailAnalysisMsg = result.msg;
+            updateEmailUI();
+            if (!result.valid) return;
+            state.studentName = n;
+            state.studentEmail = e;
+            state.view = 'playing';
+            if (state.currentMode === 'evaluacion_final') {
+                startTimer();
+            }
+            render();
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function getTimerPhaseClass(remaining) {
+            for (const phase of EVAL_TIMER_PHASES) {
+                if (remaining >= phase.minSeconds) {
+                    return phase.colorClass;
+                }
+            }
+            return EVAL_TIMER_PHASES[EVAL_TIMER_PHASES.length - 1].colorClass;
+        }
+
+        function startTimer() {
+            stopTimer();
+            state.timeLeft = EVAL_TIMER_SECONDS;
+            timerInterval = setInterval(() => {
+                state.timeLeft--;
+                if (state.timeLeft <= 0) {
+                    state.timeLeft = 0;
+                    stopTimer();
+                    state.view = 'results';
+                    render();
+                    enviarCorreo();
+                    return;
+                }
+                const timerEl = document.getElementById('eval-timer');
+                if (timerEl) {
+                    timerEl.textContent = formatTime(state.timeLeft);
+                    timerEl.className = `px-3 py-1.5 rounded-xl border-2 font-black text-sm tabular-nums ${getTimerPhaseClass(state.timeLeft)}`;
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function isMultiQuestion(q) {
+            return q.multi === 'ON';
+        }
+
+        function arraysEqual(a, b) {
+            if (!Array.isArray(a) || !Array.isArray(b)) return false;
+            if (a.length !== b.length) return false;
+            const sa = [...a].sort();
+            const sb = [...b].sort();
+            return sa.every((v, i) => v === sb[i]);
+        }
+
+        function handleAnswer(idx) {
+            if (state.isAnswerCorrect !== null) return;
+            const currentQ = state.activeQuestions[state.currentQuestion];
+            const option = currentQ.options[idx];
+
+            if (isMultiQuestion(currentQ)) {
+                let selected = Array.isArray(state.selectedAnswer) ? [...state.selectedAnswer] : [];
+                const pos = selected.indexOf(option);
+                if (pos > -1) {
+                    selected.splice(pos, 1);
+                } else {
+                    if (selected.length >= currentQ.maxSelect) return;
+                    selected.push(option);
+                }
+                state.selectedAnswer = selected;
+                render();
+            } else {
+                if (state.selectedAnswer !== null) return;
+                state.selectedAnswer = option;
+                state.isAnswerCorrect = (option === currentQ.answer);
+                if (state.isAnswerCorrect) state.score++;
+                render();
+                if (state.isAnswerCorrect) {
+                    setTimeout(() => nextQuestion(), 1000);
+                }
+            }
+        }
+
+        function checkMultiAnswer() {
+            if (state.isAnswerCorrect !== null) return;
+            const currentQ = state.activeQuestions[state.currentQuestion];
+            if (!isMultiQuestion(currentQ)) return;
+            const selected = Array.isArray(state.selectedAnswer) ? state.selectedAnswer : [];
+            if (selected.length === 0) return;
+            const correctAnswers = Array.isArray(currentQ.answer) ? currentQ.answer : [currentQ.answer];
+            state.isAnswerCorrect = arraysEqual(selected, correctAnswers);
+            if (state.isAnswerCorrect) state.score++;
+            render();
+            if (state.isAnswerCorrect) {
+                setTimeout(() => nextQuestion(), 1000);
+            }
+        }
+
+        function nextQuestion() {
+            if (state.currentQuestion + 1 < state.activeQuestions.length) {
+                state.currentQuestion++;
+                state.selectedAnswer = null;
+                state.isAnswerCorrect = null;
+                render();
+            } else {
+                stopTimer();
+                state.view = 'results';
+                render();
+                enviarCorreo();
+            }
+        }
+
+        function enviarCorreo() {
+            if (!state.studentEmail) return;
+            state.emailStatus = 'sending';
+            render();
+            const scorePerc = Math.round((state.score / state.activeQuestions.length) * 100);
+            const totalQ = state.activeQuestions.length;
+            let imageUrl = '';
+            let mensaje = '';
+            if (scorePerc >= 90) {
+                imageUrl = 'https://img.icons8.com/color/128/medal2.png';
+                mensaje = `¡Excelente trabajo, ${state.studentName}! Obtuviste un resultado sobresaliente.`;
+            } else if (scorePerc >= 70) {
+                imageUrl = 'https://img.icons8.com/color/128/diploma.png';
+                mensaje = `¡Muy bien, ${state.studentName}! Has aprobado con un buen resultado.`;
+            } else if (scorePerc >= 50) {
+                imageUrl = 'https://img.icons8.com/color/128/ok.png';
+                mensaje = `Buen esfuerzo, ${state.studentName}. Sigue practicando para mejorar.`;
+            } else {
+                imageUrl = 'https://img.icons8.com/color/128/error.png';
+                mensaje = `Ánimo, ${state.studentName}. Revisa el material y vuelve a intentarlo.`;
+            }
+            const params = {
+                to_name: state.studentName,
+                to_email: state.studentEmail,
+                score: scorePerc,
+                correct_answers: state.score,
+                total_questions: totalQ,
+                mode_name: state.currentMode.toUpperCase(),
+                image_url: imageUrl,
+                mensaje: mensaje,
+                fecha: new Date().toLocaleDateString('es-ES', {
+                    year: 'numeric', month: 'long', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                })
+            };
+            emailjs.send("service_dhvsi72", "template_cy74x9h", params)
+                .then(() => {
+                    state.emailStatus = 'success';
+                    render();
+                })
+                .catch((err) => {
+                    console.error('Error EmailJS:', err);
+                    state.emailStatus = 'error';
+                    render();
+                });
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+           
+            let modeTitle = '';
+            let modeDesc = '';
+            if (state.currentMode === 'deber') {
+                modeTitle = '🧪 Deber';
+                modeDesc = 'Resuelve las 30 preguntas del banco en orden.';
+            } else if (state.currentMode === 'evaluacion') {
+                modeTitle = '📝 Repaso';
+                modeDesc = 'Prueba de 10 preguntas seleccionadas al azar.';
+            } else if (state.currentMode === 'extra') {
+                modeTitle = '📚 Práctica';
+                modeDesc = 'Resuelve las 20 preguntas de práctica.';
+            } else if (state.currentMode === 'evaluacion_final') {
+                modeTitle = '📊 Evaluación';
+                modeDesc = 'Resuelve las 16 preguntas de la Evaluación (tiempo límite: 16 min).';
+            }
+           
+            if (state.view === 'quiz_home') {
+                app.innerHTML = `
+                <div class="text-center py-16 animate-fade-in bg-white rounded-[3rem] shadow-xl border">
+                    <h2 class="text-4xl font-black text-slate-800 mb-2">${modeTitle}</h2>
+                    <p class="text-slate-500 mb-8 text-lg">${modeDesc}</p>
+                    <button onclick="startQuiz()" class="bg-emerald-600 text-white px-12 py-5 rounded-2xl font-black text-xl hover:bg-emerald-700 transition-all">
+                        INICIAR
+                    </button>
+                </div>`;
+            }
+
+            if (state.view === 'name_input') {
+                app.innerHTML = `
+                <div class="max-w-md mx-auto bg-white p-10 rounded-[2.5rem] shadow-2xl animate-fade-in">
+                    <h2 class="text-2xl font-black mb-6 text-center">Registro de Estudiante</h2>
+                    <input id="name-in" type="text" placeholder="Nombre y Apellido completo" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl mb-4 focus:border-emerald-500 outline-none">
+                   
+                    <div class="relative mb-1">
+                        <input id="email-in" type="email" placeholder="Correo para recibir nota (Gmail, Hotmail…)"
+                               class="w-full p-4 bg-slate-50 border border-slate-300 rounded-xl focus:border-emerald-500 outline-none transition-colors"
+                               oninput="onEmailInput()" onblur="onEmailInput()">
+                    </div>
+                   
+                    <div id="email-feedback" class="min-h-[22px] mb-1"></div>
+                    <div id="email-analysis" class="mb-5"></div>
+                   
+                    <button onclick="validaDatos()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-all">
+                        ENTRAR AL TEST
+                    </button>
+                    <p class="text-center text-[11px] text-slate-400 mt-4">Se verifica formato y se descartan correos temporales. No se envía nada hasta terminar el test.</p>
+                </div>`;
+                setTimeout(updateEmailUI, 50);
+            }
+
+            if (state.view === 'playing') {
+                const q = state.activeQuestions[state.currentQuestion];
+                const progress = ((state.currentQuestion + 1) / state.activeQuestions.length) * 100;
+                const multi = isMultiQuestion(q);
+                const selected = multi
+                    ? (Array.isArray(state.selectedAnswer) ? state.selectedAnswer : [])
+                    : (state.selectedAnswer ? [state.selectedAnswer] : []);
+
+                const multiHint = multi
+                    ? `<p class="text-sm text-sky-600 font-semibold mb-4">
+                         Selección múltiple · elige ${q.maxSelect} respuesta${q.maxSelect > 1 ? 's' : ''}
+                         ${selected.length > 0 ? `(${selected.length}/${q.maxSelect})` : ''}
+                       </p>`
+                    : '';
+
+                const timerHtml = (state.currentMode === 'evaluacion_final')
+                    ? `<div id="eval-timer" class="px-3 py-1.5 rounded-xl border-2 font-black text-sm tabular-nums ${getTimerPhaseClass(state.timeLeft)}">
+                           ${formatTime(state.timeLeft)}
+                       </div>`
+                    : '';
+
+                app.innerHTML = `
+                <div class="animate-fade-in">
+                    <div class="flex justify-between items-center mb-6 px-4 gap-4">
+                        <span class="font-black text-emerald-600">${state.currentQuestion + 1} / ${state.activeQuestions.length}</span>
+                        <div class="flex-1 max-w-xs bg-slate-200 h-2 rounded-full overflow-hidden">
+                            <div class="bg-emerald-500 h-full transition-all" style="width:${progress}%"></div>
+                        </div>
+                        ${timerHtml}
+                    </div>
+                    <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-xl border">
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2 leading-tight">${q.question}</h2>
+                        ${multiHint}
+                        <div class="grid gap-3">
+                            ${q.options.map((opt, idx) => {
+                                let style = "border-slate-100 bg-slate-50 hover:border-emerald-200";
+                                const isSelected = selected.includes(opt);
+
+                                if (state.isAnswerCorrect !== null) {
+                                    if (multi) {
+                                        const correctSet = Array.isArray(q.answer) ? q.answer : [q.answer];
+                                        if (correctSet.includes(opt) && isSelected) {
+                                            style = "border-emerald-500 bg-emerald-100 text-emerald-800";
+                                        } else if (isSelected && !correctSet.includes(opt)) {
+                                            style = "border-red-500 bg-red-100 text-red-800";
+                                        } else if (correctSet.includes(opt) && !isSelected) {
+                                            style = "border-emerald-300 bg-emerald-50 text-emerald-700";
+                                        }
+                                    } else {
+                                        if (opt === q.answer) {
+                                            style = "border-emerald-500 bg-emerald-100 text-emerald-800";
+                                        } else if (isSelected) {
+                                            style = "border-red-500 bg-red-100 text-red-800";
+                                        }
+                                    }
+                                } else if (isSelected) {
+                                    if (multi) {
+                                        style = "border-sky-400 bg-sky-100 text-sky-800";
+                                    } else {
+                                        style = "border-emerald-500 bg-emerald-100 text-emerald-800";
+                                    }
+                                }
+
+                                return `<button onclick="handleAnswer(${idx})" 
+                                            class="p-5 text-left border-2 rounded-xl font-bold transition-all ${style}">
+                                            ${opt}
+                                        </button>`;
+                            }).join('')}
+                        </div>
+
+                        ${multi && state.isAnswerCorrect === null ? `
+                            <button onclick="checkMultiAnswer()" 
+                                class="mt-6 w-full py-4 rounded-xl font-bold transition-all
+                                ${selected.length === q.maxSelect 
+                                    ? 'bg-sky-600 text-white hover:bg-sky-700' 
+                                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'}"
+                                ${selected.length !== q.maxSelect ? 'disabled' : ''}>
+                                Comprobar respuesta (${selected.length}/${q.maxSelect})
+                            </button>
+                        ` : ''}
+
+                        ${state.selectedAnswer !== null && state.isAnswerCorrect === false ? `
+                            <div class="mt-6 p-5 bg-amber-50 border border-amber-200 rounded-xl">
+                                <p class="font-bold text-amber-800 mb-2">Explicación:</p>
+                                <p class="text-slate-700">${q.explanation}</p>
+                            </div>
+                            <button onclick="nextQuestion()" class="mt-6 w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition-all">
+                                Siguiente pregunta
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>`;
+            }
+
+            if (state.view === 'results') {
+                const scorePerc = Math.round((state.score / state.activeQuestions.length) * 100);
+                app.innerHTML = `
+                <div class="max-w-md mx-auto text-center animate-fade-in bg-white p-12 rounded-[3rem] shadow-2xl">
+                    <h2 class="text-2xl font-black mb-2">${state.studentName}</h2>
+                    <p class="text-slate-400 uppercase text-xs font-bold mb-6">${state.currentMode}</p>
+                    <div class="text-7xl font-black text-emerald-600 mb-4">${scorePerc}%</div>
+                    <p class="text-lg font-bold text-slate-700 mb-10">${state.score} / ${state.activeQuestions.length} correctas</p>
+                    <button onclick="location.reload()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold">VOLVER AL INICIO</button>
+                    <p class="mt-6 text-xs font-bold text-slate-400">
+                        ${state.emailStatus === 'success' ? '✅ Nota e imagen enviadas al correo' :
+                          state.emailStatus === 'error' ? '⚠️ Error al enviar nota e imagen' :
+                          '⏳ Enviando nota e imagen al correo...'}
+                    </p>
+                </div>`;
+            }
+        }
+        render();
+    </script>
+</body>
+</html>
